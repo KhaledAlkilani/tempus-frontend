@@ -18,7 +18,7 @@ export default function PricesChart() {
   const [timePeriod, setTimePeriod] = useState<"today" | "week" | "month">(
     "today"
   );
-  const [resolution, setResolution] = useState<"15min" | "1hour">("1hour");
+  const [resolution, setResolution] = useState<"15min" | "1hour" | "">("1hour");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -201,19 +201,22 @@ export default function PricesChart() {
   };
 
   function RenderTitle() {
-    switch (timePeriod) {
-      case "today":
-        return <h3>{t("chart.chartTitleToday")}</h3>;
-
-      case "week":
-        return <h3>{t("chart.chartTitleWeek")}</h3>;
-
-      case "month":
-        return <h3>{t("chart.chartTitleMonth")}</h3>;
-
-      default:
-        return <h3>{t("chart.chartTitleToday")}</h3>;
+    if (timePeriod === "today") {
+      if (resolution === "15min") {
+        return <h3>{t("chart.chartTitleToday15min")}</h3>;
+      }
+      return <h3>{t("chart.chartTitleTodayHourly")}</h3>;
     }
+
+    if (timePeriod === "week") {
+      return <h3>{t("chart.chartTitleWeek")}</h3>;
+    }
+
+    if (timePeriod === "month") {
+      return <h3>{t("chart.chartTitleMonth")}</h3>;
+    }
+
+    return null;
   }
 
   function expandHourlyTo15Min(sortedData: Price[]): Price[] {
@@ -236,32 +239,8 @@ export default function PricesChart() {
 
     return expanded;
   }
-  function aggregate15MinToHourly(sorted15m: Price[]): Price[] {
-    // group by hour start
-    const groups: Record<
-      string,
-      { total: number; count: number; hourStart: Date }
-    > = {};
 
-    for (const item of sorted15m) {
-      const d = new Date(item.date);
-      const hourStart = new Date(d);
-      hourStart.setMinutes(0, 0, 0);
-
-      const key = hourStart.toISOString();
-      if (!groups[key]) groups[key] = { total: 0, count: 0, hourStart };
-
-      groups[key].total += item.value;
-      groups[key].count += 1;
-    }
-
-    return Object.values(groups)
-      .sort((a, b) => a.hourStart.getTime() - b.hourStart.getTime())
-      .map((g) => ({
-        date: g.hourStart.toISOString(),
-        value: Number((g.total / g.count).toFixed(2)),
-      }));
-  }
+  const isResolutionEnabled = timePeriod === "today";
 
   return (
     <>
@@ -282,37 +261,49 @@ export default function PricesChart() {
           </Container>
 
           <div className="filter-options">
-            <Form.Check
-              type="checkbox"
-              label={t("15min")}
-              checked={resolution === "15min"}
-              onChange={(e) =>
-                setResolution(e.target.checked ? "15min" : "1hour")
-              }
-            />
-
-            <Form.Check
-              type="checkbox"
-              label={t("1 hour")}
-              checked={resolution === "1hour"}
-              onChange={(e) =>
-                setResolution(e.target.checked ? "1hour" : "15min")
-              }
-            />
             <Button
-              onClick={() => setTimePeriod("today")}
+              onClick={() => {
+                setTimePeriod("today");
+                setResolution("1hour");
+              }}
               className={timePeriod == "today" ? "btn selected" : "btn"}
             >
               {t("day")}
             </Button>
+            <Form.Check
+              type="checkbox"
+              label={t("Hour")}
+              disabled={!isResolutionEnabled}
+              checked={resolution === "1hour"}
+              onChange={() => {
+                if (!isResolutionEnabled) return;
+                setResolution("1hour");
+              }}
+            />
+            <Form.Check
+              type="checkbox"
+              label={t("15min")}
+              disabled={!isResolutionEnabled}
+              checked={resolution === "15min"}
+              onChange={() => {
+                if (!isResolutionEnabled) return;
+                setResolution("15min");
+              }}
+            />
             <Button
-              onClick={() => setTimePeriod("week")}
+              onClick={() => {
+                setTimePeriod("week");
+                setResolution("");
+              }}
               className={timePeriod == "week" ? "btn selected" : "btn"}
             >
               {t("week")}
             </Button>
             <Button
-              onClick={() => setTimePeriod("month")}
+              onClick={() => {
+                setTimePeriod("month");
+                setResolution("");
+              }}
               className={timePeriod == "month" ? "btn selected" : "btn"}
             >
               {t("month")}
