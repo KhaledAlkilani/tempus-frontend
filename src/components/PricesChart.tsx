@@ -133,10 +133,11 @@ export default function PricesChart() {
       default:
         break;
     }
-    // Apply resolution ONLY when you're in "today" view (hourly series)
+    
+    // Apply 15min resolution only in today view
     if (timePeriod === "today") {
       if (resolution === "15min") {
-        formattedData = expandHourlyTo15Min(formattedData);
+        formattedData = breakHourlyDownTo15Min(formattedData);
       }
 
       formattedData = formattedData.map((item) => ({
@@ -219,7 +220,7 @@ export default function PricesChart() {
     return null;
   }
 
-  function expandHourlyTo15Min(sortedData: Price[]): Price[] {
+  function breakHourlyDownTo15Min(sortedData: Price[]): Price[] {
     const expanded: Price[] = [];
 
     for (const item of sortedData) {
@@ -243,74 +244,91 @@ export default function PricesChart() {
   const isResolutionEnabled = timePeriod === "today";
 
   return (
-    <>
-      <div className="info-box-chart">
-        <Container className="form-container">
-          <div className="section">{RenderTitle()}</div>
+    <div className="info-box-chart">
+      <Container className="form-container">
+        <div className="section">{RenderTitle()}</div>
 
-          <Container className="chart-container">
-            {loading ? (
-              <div className="loading-animation-container">
-                <div className="loading-animation">
-                  <Lottie animationData={animationData} loop={true} />
-                </div>
+        <Container className="chart-container">
+          {loading ? (
+            <div className="loading-animation-container">
+              <div className="loading-animation">
+                <Lottie animationData={animationData} loop={true} />
               </div>
-            ) : (
-              <Bar options={options} data={formattedData} />
-            )}
-          </Container>
+            </div>
+          ) : (
+            <Bar options={options} data={formattedData} />
+          )}
+        </Container>
 
-          <div className="filter-options">
+        <div className="filter-options-grid">
+          <div className="filter-col">
             <Button
+              variant="outline-dark"
               onClick={() => {
                 setTimePeriod("today");
                 setResolution("1hour");
               }}
-              className={timePeriod == "today" ? "btn selected" : "btn"}
+              className={`filter-btn ${
+                timePeriod === "today" ? "selected" : "btn"
+              }`}
             >
               {t("day")}
             </Button>
-            <Form.Check
-              type="checkbox"
-              label={t("Hour")}
-              disabled={!isResolutionEnabled}
-              checked={resolution === "1hour"}
-              onChange={() => {
-                if (!isResolutionEnabled) return;
-                setResolution("1hour");
-              }}
-            />
-            <Form.Check
-              type="checkbox"
-              label={t("15min")}
-              disabled={!isResolutionEnabled}
-              checked={resolution === "15min"}
-              onChange={() => {
-                if (!isResolutionEnabled) return;
-                setResolution("15min");
-              }}
-            />
+
+            <div className="d-flex justify-content-center gap-2 mt-2">
+              <Form.Check
+                type="checkbox"
+                label={t("Hour")}
+                disabled={!isResolutionEnabled}
+                checked={resolution === "1hour"}
+                onChange={() => {
+                  if (!isResolutionEnabled) return;
+                  setResolution("1hour");
+                }}
+              />
+              <Form.Check
+                type="checkbox"
+                label={t("15min")}
+                disabled={!isResolutionEnabled}
+                checked={resolution === "15min"}
+                onChange={() => {
+                  if (!isResolutionEnabled) return;
+                  setResolution("15min");
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="filter-col">
             <Button
+              variant="outline-dark"
               onClick={() => {
                 setTimePeriod("week");
                 setResolution("");
               }}
-              className={timePeriod == "week" ? "btn selected" : "btn"}
+              className={`filter-btn ${
+                timePeriod === "week" ? "selected" : "btn"
+              }`}
             >
               {t("week")}
             </Button>
+          </div>
+          <div className="filter-col">
             <Button
+              variant="outline-dark"
               onClick={() => {
                 setTimePeriod("month");
                 setResolution("");
               }}
-              className={timePeriod == "month" ? "btn selected" : "btn"}
+              className={`filter-btn ${
+                timePeriod === "month" ? "selected" : "btn"
+              }`}
             >
               {t("month")}
             </Button>
           </div>
-        </Container>
-      </div>
-    </>
+        </div>
+      </Container>
+    </div>
   );
 }

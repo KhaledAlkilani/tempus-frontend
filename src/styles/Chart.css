@@ -1,7 +1,27 @@
-
 .info-box-chart {
   background-color: #f5ba3c;
   color: black;
   border-radius: 8px;
   margin-bottom: 1rem;
+}
+
+.filter-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.filter-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-btn {
+  border-color: black;
+  color: black;
+}
+
+.filter-btn.selected {
+  background-color: black;
+  color: white;
 }
