@@ -133,7 +133,7 @@ export default function PricesChart() {
       default:
         break;
     }
-    
+
     // Apply 15min resolution only in today view
     if (timePeriod === "today") {
       if (resolution === "15min") {
@@ -278,7 +278,7 @@ export default function PricesChart() {
             <div className="d-flex justify-content-center gap-2 mt-2">
               <Form.Check
                 type="checkbox"
-                label={t("Hour")}
+                label={t("hour")}
                 disabled={!isResolutionEnabled}
                 checked={resolution === "1hour"}
                 onChange={() => {
